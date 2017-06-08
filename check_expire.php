@@ -26,11 +26,17 @@ $useremailheader	= "	From: IT Support <support@sub.domain.tld>\r\n
 						Priority: Urgent\r\nMIME-Version: 1.0\r\n
 						Content-Type: text/html; charset=ISO-8859-1\r\n";
 						
+$useremailheader = "MIME-Version: 1.0" . "\r\n";
+$useremailheader .= "Content-type:text/html;charset=UTF-8" . "\r\n";
+
 // Email alias for administrators.  This email will get a listing of the users that are expiring.
 $adminemailto 		= "admin@sub.domain.tld";
 // From email header  on admin notifications.  
 $adminemailheader	= "	From: IT Support <support@sub.domain.tld>\r\n
 						Content-Type: text/html; charset=ISO-8859-1\r\n";
+
+$adminemailheader = "MIME-Version: 1.0" . "\r\n";
+$adminemailheader .= "Content-type:text/html;charset=UTF-8" . "\r\n";
 
 // Debugging Options
 // 1 is Enabled, 0 is Disabled
@@ -43,7 +49,7 @@ $debug			= "0";
 // Default variables
 $listforadmin 	= "";
 $filter			= "(&(objectCategory=Person)(objectClass=User))";
-$attrib			= array("sn", "givenname", "displayName", "sAMAccountName", "msDS-UserPasswordExpiryTimeComputed", "mail");
+$attrib			= array("sn", "givenname", "cn", "sAMAccountName", "msDS-UserPasswordExpiryTimeComputed", "mail");
 
 //Check that the proper command line arguments have been passed to the script.
 $argumentOU = getopt("o:");
@@ -114,7 +120,7 @@ for($i = 0; $i < $count; $i++) {
 	$timeepoch = ($dsarray[$i]['msds-userpasswordexpirytimecomputed'][0] - 116444736000000000) / 10000000;
 	$timetemp = split( "[.]" ,$timeepoch, 2);
 	$timehuman = date("m-d-Y H:i:s", "$timetemp[0]");
-	echo "Name: {$dsarray[$i]['displayname'][0]} \t\t Date: $timehuman \t{$dsarray[$i]['dn']}\n";
+	echo "Name: {$dsarray[$i]['cn'][0]} \t\t Date: $timehuman \t{$dsarray[$i]['dn']}\n";
 	
 			// Check to see if password expiration is within our warning time limit.
 			if ($dsarray[$i]['msds-userpasswordexpirytimecomputed'][0] <= $warndatethresh && $dsarray[$i]['msds-userpasswordexpirytimecomputed'][0] >= $dateasadint) {
@@ -122,7 +128,7 @@ for($i = 0; $i < $count; $i++) {
 			$listforadmin .= "{$dsarray[$i]['samaccountname'][0]} expires at $timehuman\r\n";
 		
 				print "WARNING! Password will expire.\n";
-				echo "Sending email to {$dsarray[$i]['displayname'][0]} at address {$dsarray[$i]['mail'][0]} \n";
+				echo "Sending email to {$dsarray[$i]['cn'][0]} at address {$dsarray[$i]['mail'][0]} \n";
 				
 				//If debug is enabled, then send all emails to admin
 				if($debug=="0") {
@@ -140,7 +146,7 @@ for($i = 0; $i < $count; $i++) {
 					// Get the email from a template in the same directory as this script.
 					if(file_exists($scriptPath . "user_email.tpl")) {
 						$userbody = file_get_contents($scriptPath . "user_email.tpl");
-						$userbody = str_replace("__DISPLAYNAME__", $dsarray[$i]['displayname'][0], $userbody);
+						$userbody = str_replace("__DISPLAYNAME__", $dsarray[$i]['cn'][0], $userbody);
 						$userbody = str_replace("__SAMACCOUNTNAME__", $dsarray[$i]['samaccountname'][0], $userbody);
 						$userbody = str_replace("__EXPIRETIME__", $timehuman, $userbody);
 					}
