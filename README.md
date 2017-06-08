@@ -24,8 +24,8 @@ with expiring passwords:
 When running from CentOS, 
 * Postfix configuration is assumed to be working, 
 * php and php-ldap packages should be installed.
-* Edit /etc/php.ini to adjust the appropriate date.timezone = value as well as potential
-to include sendmail arguments for -F (for friendly/full name) and -f (for address of the from person)
+* Edit /etc/php.ini to adjust the appropriate date.timezone = value (https://secure.php.net/manual/en/timezones.php)
+as well as potential to include sendmail arguments for -F (for friendly/full name) and -f (for address of the from person)
 
 Example: /path/to/script/check_expire.php -o "CN=Users, DC=domain, DC=com"
 
