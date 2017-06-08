@@ -24,14 +24,14 @@ $warndays		= "15";
 // From email header  on end-user notifications.  
 $useremailheader = "MIME-Version: 1.0" . "\r\n";
 $useremailheader .= "Content-type:text/html;charset=UTF-8" . "\r\n";
-$useremailheader .= 'From: IT Support <support@sub.domain.tld>' . "\r\n";
+$useremailheader .= "From: IT Support <support@sub.domain.tld>" . "\r\n";
 
 // Email alias for administrators.  This email will get a listing of the users that are expiring.
 $adminemailto 		= "admin@sub.domain.tld";
 // From email header  on admin notifications.  
 $adminemailheader = "MIME-Version: 1.0" . "\r\n";
 $adminemailheader .= "Content-type:text/html;charset=UTF-8" . "\r\n";
-$adminemailheader .= 'From: IT Support <support@sub.domain.tld>' . "\r\n";
+$adminemailheader .= "From: IT Support <support@sub.domain.tld>" . "\r\n";
 
 // Debugging Options
 // 1 is Enabled, 0 is Disabled
