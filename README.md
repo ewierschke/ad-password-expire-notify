@@ -22,7 +22,8 @@ Execute php script with the -o flag to specifiying which OU to search for users
 with expiring passwords:
 
 When running from CentOS, 
-* Postfix configuration is assumed to be working, php and php-ldap packages should be installed.
+* Postfix configuration is assumed to be working, 
+* php and php-ldap packages should be installed.
 * Edit /etc/php.ini to adjust the appropriate date.timezone = value as well as potential
 to include sendmail arguments for -F (for friendly/full name) and -f (for address of the from person)
 

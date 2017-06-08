@@ -22,21 +22,16 @@ $ldaphost 		= "ldap://dc.sub.domain.tld/";
 //  How many days out to start warning the user.
 $warndays		= "15";
 // From email header  on end-user notifications.  
-$useremailheader	= "	From: IT Support <support@sub.domain.tld>\r\n
-						Priority: Urgent\r\nMIME-Version: 1.0\r\n
-						Content-Type: text/html; charset=ISO-8859-1\r\n";
-						
 $useremailheader = "MIME-Version: 1.0" . "\r\n";
 $useremailheader .= "Content-type:text/html;charset=UTF-8" . "\r\n";
+$useremailheader .= 'From: IT Support <support@sub.domain.tld>' . "\r\n";
 
 // Email alias for administrators.  This email will get a listing of the users that are expiring.
 $adminemailto 		= "admin@sub.domain.tld";
 // From email header  on admin notifications.  
-$adminemailheader	= "	From: IT Support <support@sub.domain.tld>\r\n
-						Content-Type: text/html; charset=ISO-8859-1\r\n";
-
 $adminemailheader = "MIME-Version: 1.0" . "\r\n";
 $adminemailheader .= "Content-type:text/html;charset=UTF-8" . "\r\n";
+$adminemailheader .= 'From: IT Support <support@sub.domain.tld>' . "\r\n";
 
 // Debugging Options
 // 1 is Enabled, 0 is Disabled
