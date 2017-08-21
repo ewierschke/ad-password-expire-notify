@@ -44,7 +44,7 @@ $debug			= "0";
 // Default variables
 $listforadmin 	= "";
 $filter			= "(&(objectCategory=Person)(objectClass=User))";
-$attrib			= array("sn", "givenname", "cn", "sAMAccountName", "msDS-UserPasswordExpiryTimeComputed", "mail");
+$attrib			= array("sn", "givenname", "cn", "sAMAccountName", "msDS-UserPasswordExpiryTimeComputed", "mail", "pwmresponseset");
 
 //Check that the proper command line arguments have been passed to the script.
 $argumentOU = getopt("o:");
@@ -116,18 +116,36 @@ for($i = 0; $i < $count; $i++) {
 	$timetemp = split( "[.]" ,$timeepoch, 2);
 	$timehuman = date("m-d-Y H:i:s", "$timetemp[0]");
 	echo "Name: {$dsarray[$i]['cn'][0]} \t\t Date: $timehuman \t{$dsarray[$i]['dn']}\n";
-	
+	if (!isset($dsarray[$i]['pwmresponseset'][0])) {
+		echo "PWM Response Set is not stored\n";
+		$doesnot = "<strong>NOT</strong>";
+	}
+
+			// Check to see if password has already expired.
+			if ($dsarray[$i]['msds-userpasswordexpirytimecomputed'][0] < $dateasadint) {
+				$listforadmin .= "{$dsarray[$i]['samaccountname'][0]} expired on $timehuman and does $doesnot have PWM password responses stored.\r\n\t<br />";
+			}
+
 			// Check to see if password expiration is within our warning time limit.
 			if ($dsarray[$i]['msds-userpasswordexpirytimecomputed'][0] <= $warndatethresh && $dsarray[$i]['msds-userpasswordexpirytimecomputed'][0] >= $dateasadint) {
-			
-			$listforadmin .= "{$dsarray[$i]['samaccountname'][0]} expires at $timehuman\r\n";
+				$from=date_create(date('Y-m-d'));
+				$to=date_create(date("Y-m-d", "$timetemp[0]"));
+				$diff = date_diff($to,$from);
+				$numdays = $diff->format('%a');
+				$timetill = "in $numdays days at $timehuman";
+
+				$listforadmin .= "{$dsarray[$i]['samaccountname'][0]} expires $timetill and does $doesnot have PWM password responses stored.\r\n\t<br />";
 		
 				print "WARNING! Password will expire.\n";
 				echo "Sending email to {$dsarray[$i]['cn'][0]} at address {$dsarray[$i]['mail'][0]} \n";
 				
 				//If debug is enabled, then send all emails to admin
 				if($debug=="0") {
-				
+					//If pwmresponseset is not set replace pwmstatus with user text to setup pwmresponseset
+					$pwmstatus = " ";
+					if(isset($doesnot)) {
+						$pwmstatus = "You have not setup your password responses in PWM to ease password recovery.  Please login to PWM and setup your password responses before your password expires.";
+					}
 					//If mail is defined in LDAP use mail, if not send to admin email.
 					if($dsarray[$i]['mail'][0]) {
 						$userto = "{$dsarray[$i]['mail'][0]}";
@@ -141,9 +159,10 @@ for($i = 0; $i < $count; $i++) {
 					// Get the email from a template in the same directory as this script.
 					if(file_exists($scriptPath . "user_email.tpl")) {
 						$userbody = file_get_contents($scriptPath . "user_email.tpl");
-						$userbody = str_replace("__DISPLAYNAME__", $dsarray[$i]['cn'][0], $userbody);
+						$userbody = str_replace("__DISPLAYNAME__", $dsarray[$i]['givenname'][0], $userbody);
 						$userbody = str_replace("__SAMACCOUNTNAME__", $dsarray[$i]['samaccountname'][0], $userbody);
 						$userbody = str_replace("__EXPIRETIME__", $timehuman, $userbody);
+						$userbody = str_replace("__PWMRESPONSESETSTATUS__", $pwmstatus, $userbody);
 					}
 			
 						// Send the email to the user.
@@ -152,6 +171,7 @@ for($i = 0; $i < $count; $i++) {
 							} else {
 								echo("User email delivery failed.\n");
 							}
+					unset($pwmstatus);
 					//End If Debug
 					}
 			//End check for expiration within warning time limit.
@@ -164,6 +184,9 @@ for($i = 0; $i < $count; $i++) {
 	unset($userto);
 	unset($usersubject);
 	unset($userbody);
+	unset($doesnot);
+	unset($timetill);
+	unset($diff);
 	
 //End for loop for each entry in LDAP.
 }

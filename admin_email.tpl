@@ -48,7 +48,7 @@ hr {
 
     <div class="content">
     <center><img src="https://www.sub.domain.tld/images/company_logo.png" style="headerlogo" /></center><br /><hr /><br /><br />
-    Below is a listing of expired password notifications sent on __CURRENTDATE__.<br />
+    Below is a listing of expired passwords and expiring password notifications sent on __CURRENTDATE__.<br />
     This list is for the organizational unit: __USEROU__<br />
     <br />
     __USERLIST__

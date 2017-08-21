@@ -51,6 +51,7 @@ hr {
     __DISPLAYNAME__,<br />
     <br />
     The password for your user account, __SAMACCOUNTNAME__, will expire on <strong>__EXPIRETIME__</strong>.<br />
+    __PWMRESPONSESETSTATUS__
     <br />
     Thank you.<br />
     <br />
