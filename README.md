@@ -26,7 +26,7 @@ and _OSTEMAIL_ with environment specific entries
 
 When running from CentOS, 
 * Postfix configuration is assumed to be working, 
-* php and php-ldap packages should be installed (`yum -y install php php-ldap`).
+* php and php-ldap packages should be installed; `yum -y install php php-ldap`
 * Edit /etc/php.ini to adjust the appropriate date.timezone = value 
 (https://secure.php.net/manual/en/timezones.php)
 as well as potential to include sendmail arguments for 
