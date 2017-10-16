@@ -161,7 +161,7 @@ for($i = 0; $i < $count; $i++) {
 						$userbody = file_get_contents($scriptPath . "user_email_inlined.tpl");
 						$userbody = str_replace("__DISPLAYNAME__", $dsarray[$i]['givenname'][0], $userbody);
 						$userbody = str_replace("__SAMACCOUNTNAME__", $dsarray[$i]['samaccountname'][0], $userbody);
-						$userbody = str_replace("__EXPIRETIME__", $timehuman, $userbody);
+						$userbody = str_replace("__EXPIRETIME__", $timetill, $userbody);
 						$userbody = str_replace("__PWMRESPONSESETSTATUS__", $pwmstatus, $userbody);
 					}
 			
