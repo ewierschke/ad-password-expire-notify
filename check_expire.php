@@ -144,7 +144,7 @@ for($i = 0; $i < $count; $i++) {
 					//If pwmresponseset is not set replace pwmstatus with user text to setup pwmresponseset
 					$pwmstatus = " ";
 					if(isset($doesnot)) {
-						$pwmstatus = "You have not setup your password responses in PWM to ease password recovery.  Please login to PWM and setup your password responses before your password expires.";
+						$pwmstatus = "You have NOT setup your password responses in PWM to ease password recovery.  Please do so now.";
 					}
 					//If mail is defined in LDAP use mail, if not send to admin email.
 					if($dsarray[$i]['mail'][0]) {
@@ -157,8 +157,8 @@ for($i = 0; $i < $count; $i++) {
 					
 					// Warning Email
 					// Get the email from a template in the same directory as this script.
-					if(file_exists($scriptPath . "user_email.tpl")) {
-						$userbody = file_get_contents($scriptPath . "user_email.tpl");
+					if(file_exists($scriptPath . "user_email_inlined.tpl")) {
+						$userbody = file_get_contents($scriptPath . "user_email_inlined.tpl");
 						$userbody = str_replace("__DISPLAYNAME__", $dsarray[$i]['givenname'][0], $userbody);
 						$userbody = str_replace("__SAMACCOUNTNAME__", $dsarray[$i]['samaccountname'][0], $userbody);
 						$userbody = str_replace("__EXPIRETIME__", $timehuman, $userbody);
