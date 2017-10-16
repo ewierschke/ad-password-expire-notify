@@ -21,8 +21,8 @@ Edit .tpl files to adjust email format for notifications.
 Execute php script with the -o flag to specifiy which OU to search for users 
 with expiring passwords
 
-Edit the file user_email_inlined.tpl to replace _ENVIRNAME_, _PWMURL_, _OSTURL_,
-and _OSTEMAIL_ with environment specific entries
+Edit the file user_email_inlined.tpl to replace \_ENVIRNAME\_, \_PWMURL\_, 
+\_OSTURL\_, and \_OSTEMAIL\_ with environment specific entries
 
 When running from CentOS, 
 * Postfix configuration is assumed to be working, 
