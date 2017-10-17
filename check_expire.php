@@ -193,9 +193,9 @@ for($i = 0; $i < $count; $i++) {
 
 //Send email of users to admin.
 if ($listforadmin) {
-	$adminsubject = "List of Expired Passwords";
-	if(file_exists($scriptPath . "admin_email.tpl")) {
-				$adminbody = file_get_contents($scriptPath . "admin_email.tpl");
+	$adminsubject = "List of Expired or Expiring Passwords";
+	if(file_exists($scriptPath . "admin_email_inlined.tpl")) {
+				$adminbody = file_get_contents($scriptPath . "admin_email_inlined.tpl");
 				$adminbody = str_replace("__CURRENTDATE__", $currentdatehuman, $adminbody);
 				$adminbody = str_replace("__USERLIST__", $listforadmin, $adminbody);
 				$adminbody =  str_replace("__USEROU__", $argumentOU['o'], $adminbody);
