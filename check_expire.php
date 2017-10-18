@@ -123,7 +123,7 @@ for($i = 0; $i < $count; $i++) {
 
 			// Check to see if password has already expired.
 			if ($dsarray[$i]['msds-userpasswordexpirytimecomputed'][0] < $dateasadint) {
-				$listforadmin .= "{$dsarray[$i]['samaccountname'][0]} expired on $timehuman and does $doesnot have PWM password responses stored.\r\n\t<br />";
+				$listforadmin .= "<tr><td>{$dsarray[$i]['samaccountname'][0]}</td><td>expired on $timehuman and</td><td>does $doesnot have PWM password responses stored.\r\n\t<br /></td></tr>";
 			}
 
 			// Check to see if password expiration is within our warning time limit.
@@ -134,7 +134,7 @@ for($i = 0; $i < $count; $i++) {
 				$numdays = $diff->format('%a');
 				$timetill = "in $numdays days at $timehuman";
 
-				$listforadmin .= "{$dsarray[$i]['samaccountname'][0]} expires $timetill and does $doesnot have PWM password responses stored.\r\n\t<br />";
+				$listforadmin .= "<tr><td>{$dsarray[$i]['samaccountname'][0]}</td><td>expires $timetill and</td><td>does $doesnot have PWM password responses stored.\r\n\t<br /></td></tr>";
 		
 				print "WARNING! Password will expire.\n";
 				echo "Sending email to {$dsarray[$i]['cn'][0]} at address {$dsarray[$i]['mail'][0]} \n";
