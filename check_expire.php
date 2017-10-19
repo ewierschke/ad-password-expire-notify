@@ -114,7 +114,8 @@ for($i = 0; $i < $count; $i++) {
 	// Converts large int from AD to epoch then to human readable format
 	$timeepoch = ($dsarray[$i]['msds-userpasswordexpirytimecomputed'][0] - 116444736000000000) / 10000000;
 	$timetemp = split( "[.]" ,$timeepoch, 2);
-	$timehuman = date("m-d-Y", "$timetemp[0]");
+	$timehumanuser = date("m-d-Y", "$timetemp[0]");
+	$timehuman = date("m-d-Y H:i:s e", "$timetemp[0]");
 	$doesnot = " ";
 	$notdisabled = " ";
 	echo "Name: {$dsarray[$i]['cn'][0]} \t\t Date: $timehuman \t{$dsarray[$i]['dn']}\n";
@@ -134,7 +135,7 @@ for($i = 0; $i < $count; $i++) {
 				$diff = date_diff($to,$from);
 				$numdays = $diff->format('%a');
 				$timefrom = "$numdays days ago";
-				$listforadmin .= "<tr><td>{$dsarray[$i]['samaccountname'][0]}</td><td>is$notdisabled disabled,</td><td>password expired</td><td>$timefrom</td><td>on $timehuman and,</td><td>does $doesnot have PWM password responses stored.\r\n\t<br /></td></tr>";
+				$listforadmin .= "<tr><td>{$dsarray[$i]['samaccountname'][0]}</td><td>is$notdisabled disabled,</td><td>password expired</td><td>$timefrom</td><td>at $timehuman and,</td><td>does $doesnot have PWM password responses stored.\r\n\t<br /></td></tr>";
 			}
 
 			// Check to see if password expiration is within our warning time limit.
@@ -144,9 +145,9 @@ for($i = 0; $i < $count; $i++) {
 				$diff = date_diff($to,$from);
 				$numdays = $diff->format('%a');
 				$timetill = "in $numdays days";
-				$timetillforuser = "in $numdays days on $timehuman"
+				$timetillforuser = "in $numdays days on $timehumanuser"
 
-				$listforadmin .= "<tr><td>{$dsarray[$i]['samaccountname'][0]}</td><td>is$notdisabled disabled,</td><td>expires</td><td>$timetill</td><td>on $timehuman and,</td><td>does $doesnot have PWM password responses stored.\r\n\t<br /></td></tr>";
+				$listforadmin .= "<tr><td>{$dsarray[$i]['samaccountname'][0]}</td><td>is$notdisabled disabled,</td><td>expires</td><td>$timetill</td><td>at $timehuman and,</td><td>does $doesnot have PWM password responses stored.\r\n\t<br /></td></tr>";
 		
 				print "WARNING! Password will expire.\n";
 				echo "Sending email to {$dsarray[$i]['cn'][0]} at address {$dsarray[$i]['mail'][0]} \n";
