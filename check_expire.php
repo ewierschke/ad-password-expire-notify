@@ -114,7 +114,7 @@ for($i = 0; $i < $count; $i++) {
 	// Converts large int from AD to epoch then to human readable format
 	$timeepoch = ($dsarray[$i]['msds-userpasswordexpirytimecomputed'][0] - 116444736000000000) / 10000000;
 	$timetemp = split( "[.]" ,$timeepoch, 2);
-	$timehuman = date("m-d-Y H:i:s", "$timetemp[0]");
+	$timehuman = date("m-d-Y", "$timetemp[0]");
 	$doesnot = " ";
 	$notdisabled = " ";
 	echo "Name: {$dsarray[$i]['cn'][0]} \t\t Date: $timehuman \t{$dsarray[$i]['dn']}\n";
@@ -133,8 +133,8 @@ for($i = 0; $i < $count; $i++) {
 				$to=date_create(date("Y-m-d", "$timetemp[0]"));
 				$diff = date_diff($to,$from);
 				$numdays = $diff->format('%a');
-				$timefrom = "$numdays days ago at $timehuman";
-				$listforadmin .= "<tr><td>{$dsarray[$i]['samaccountname'][0]}</td><td>is$notdisabled disabled,</td><td>password expired $timefrom and</td><td>does $doesnot have PWM password responses stored.\r\n\t<br /></td></tr>";
+				$timefrom = "$numdays days ago";
+				$listforadmin .= "<tr><td>{$dsarray[$i]['samaccountname'][0]}</td><td>is$notdisabled disabled,</td><td>password expired</td><td>$timefrom</td><td>on $timehuman and,</td><td>does $doesnot have PWM password responses stored.\r\n\t<br /></td></tr>";
 			}
 
 			// Check to see if password expiration is within our warning time limit.
@@ -143,9 +143,10 @@ for($i = 0; $i < $count; $i++) {
 				$to=date_create(date("Y-m-d", "$timetemp[0]"));
 				$diff = date_diff($to,$from);
 				$numdays = $diff->format('%a');
-				$timetill = "in $numdays days at $timehuman";
+				$timetill = "in $numdays days";
+				$timetillforuser = "in $numdays days on $timehuman"
 
-				$listforadmin .= "<tr><td>{$dsarray[$i]['samaccountname'][0]}</td><td>is$notdisabled disabled,</td><td>expires $timetill and</td><td>does $doesnot have PWM password responses stored.\r\n\t<br /></td></tr>";
+				$listforadmin .= "<tr><td>{$dsarray[$i]['samaccountname'][0]}</td><td>is$notdisabled disabled,</td><td>expires</td><td>$timetill</td><td>on $timehuman and,</td><td>does $doesnot have PWM password responses stored.\r\n\t<br /></td></tr>";
 		
 				print "WARNING! Password will expire.\n";
 				echo "Sending email to {$dsarray[$i]['cn'][0]} at address {$dsarray[$i]['mail'][0]} \n";
@@ -155,7 +156,7 @@ for($i = 0; $i < $count; $i++) {
 					//If pwmresponseset is not set replace pwmstatus with user text to setup pwmresponseset
 					$noreply = "null";
 					$pwmstatus = " ";
-					if(isset($doesnot)) {
+					if($doesnot == "<strong>NOT</strong>") {
 						$pwmstatus = "You have NOT setup your password responses in PWM to ease password recovery.  Please do so now.";
 					}
 					//If mail is defined in LDAP use mail, if not send to admin email.
@@ -175,7 +176,7 @@ for($i = 0; $i < $count; $i++) {
 						$userbody = file_get_contents($scriptPath . "user_email_inlined.tpl");
 						$userbody = str_replace("__DISPLAYNAME__", $dsarray[$i]['givenname'][0], $userbody);
 						$userbody = str_replace("__SAMACCOUNTNAME__", $dsarray[$i]['samaccountname'][0], $userbody);
-						$userbody = str_replace("__EXPIRETIME__", $timetill, $userbody);
+						$userbody = str_replace("__EXPIRETIME__", $timetillforuser, $userbody);
 						$userbody = str_replace("__PWMRESPONSESETSTATUS__", $pwmstatus, $userbody);
 					}
 			
