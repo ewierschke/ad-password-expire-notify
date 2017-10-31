@@ -60,6 +60,7 @@ if ($argumentOU) {
 // Get current time
 $now	= time();
 $currentdatehuman = date("m-d-Y", "$now");
+$currentdayofweek = date("w", "$now");
 
 /*
 AD date values.  Offset is approximate 10millionths of a second from 
@@ -114,7 +115,7 @@ echo "$count Entries found.\n";
 for($i = 0; $i < $count; $i++) {
 	// Converts large int from AD to epoch then to human readable format
 	$timeepoch = ($dsarray[$i]['msds-userpasswordexpirytimecomputed'][0] - 116444736000000000) / 10000000;
-	$timetemp = split( "[.]" ,$timeepoch, 2);
+	$timetemp = split( "[.]" ,$timeepoch, 2)2
 	$timehumanuser = date("m-d-Y", "$timetemp[0]");
 	$timehuman = date("m-d-Y H:i:s e", "$timetemp[0]");
 	$doesnot = " ";
@@ -213,7 +214,7 @@ for($i = 0; $i < $count; $i++) {
 }
 
 //Send email of users to admin.
-if ($listforadmin) {
+if ($listforadmin && $currentdayofweek == 1) {
 	$adminsubject = "List of Expired or Expiring Passwords";
 	if(file_exists($scriptPath . "admin_email_inlined.tpl")) {
 				$adminbody = file_get_contents($scriptPath . "admin_email_inlined.tpl");
