@@ -42,7 +42,7 @@ $debug			= "0";
 // End Options - Begin Workflow
 
 // Default variables
-$listforadmin 	= "";
+$listforadmin 	= "<tr><th><u>Username</u></th><th><u>Account Status</u></th><th><u>Password Status</u></th><th><u>Password Expired Time (in days)</u></th><th><u>Password Expired Time</u></th><th><u>PWM Response set Status</u>\r\n\t<br /></th></tr>";
 $filter			= "(&(objectCategory=Person)(objectClass=User))";
 $attrib			= array("sn", "givenname", "cn", "sAMAccountName", "msDS-UserPasswordExpiryTimeComputed", "mail", "pwmresponseset", "useraccountcontrol");
 
@@ -107,6 +107,7 @@ or die ("Could not search LDAP server.\n");
 
 $dsarray = ldap_get_entries($ldapconn, $search);
 $count = $dsarray["count"];
+$adminlistcount = 0;
 
 echo "$count Entries found.\n";
 
@@ -136,6 +137,7 @@ for($i = 0; $i < $count; $i++) {
 				$numdays = $diff->format('%a');
 				$timefrom = "$numdays days ago";
 				$listforadmin .= "<tr><td>{$dsarray[$i]['samaccountname'][0]}</td><td>is$notdisabled disabled,</td><td>password expired</td><td>$timefrom</td><td>at $timehuman and,</td><td>does $doesnot have PWM password responses stored.\r\n\t<br /></td></tr>";
+				$adminlistcount = $adminlistcount + 1;
 			}
 
 			// Check to see if password expiration is within our warning time limit.
@@ -148,7 +150,8 @@ for($i = 0; $i < $count; $i++) {
 				$timetillforuser = "in $numdays days on $timehumanuser";
 
 				$listforadmin .= "<tr><td>{$dsarray[$i]['samaccountname'][0]}</td><td>is$notdisabled disabled,</td><td>password expires</td><td>$timetill</td><td>at $timehuman and,</td><td>does $doesnot have PWM password responses stored.\r\n\t<br /></td></tr>";
-		
+				$adminlistcount = $adminlistcount + 1;
+
 				print "WARNING! Password will expire.\n";
 				echo "Sending email to {$dsarray[$i]['cn'][0]} at address {$dsarray[$i]['mail'][0]} \n";
 				
@@ -217,7 +220,8 @@ if ($listforadmin) {
 				$adminbody = str_replace("__CURRENTDATE__", $currentdatehuman, $adminbody);
 				$adminbody = str_replace("__USERLIST__", $listforadmin, $adminbody);
 				$adminbody =  str_replace("__USEROU__", $argumentOU['o'], $adminbody);
-			}
+				$adminbody =  str_replace("__USERCOUNT__", $adminlistcount, $adminbody);
+				}
 
 		if (mail($adminemailto, $adminsubject, $adminbody, $adminemailheader)) {
                        echo("Admin email successfully sent.\n");
