@@ -88,7 +88,7 @@ $ldapconn = ldap_connect($ldaphost)
 
 if ($ldapconn) {
    
-   echo "LDAP connected, attempting bind.\n";
+   echo "Attempting LDAP bind.\n";
  
    // Bind to LDAP.
    $ldapbind = ldap_bind($ldapconn, $ldapupn, $ldappass);
@@ -98,6 +98,7 @@ if ($ldapconn) {
        echo "LDAP bind successful.\n";
    } else {
        echo "LDAP bind failed.\n";
+       exit(1);
    }
 
 }
