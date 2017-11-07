@@ -115,7 +115,7 @@ echo "$count Entries found.\n";
 for($i = 0; $i < $count; $i++) {
 	// Converts large int from AD to epoch then to human readable format
 	$timeepoch = ($dsarray[$i]['msds-userpasswordexpirytimecomputed'][0] - 116444736000000000) / 10000000;
-	$timetemp = split( "[.]" ,$timeepoch, 2)2
+	$timetemp = split( "[.]" ,$timeepoch, 2);
 	$timehumanuser = date("m-d-Y", "$timetemp[0]");
 	$timehuman = date("m-d-Y H:i:s e", "$timetemp[0]");
 	$doesnot = " ";
