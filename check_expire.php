@@ -215,7 +215,7 @@ for($i = 0; $i < $count; $i++) {
 }
 
 //Send email of users to admin.
-if ($listforadmin && $currentdayofweek == 1) {
+if (($listforadmin && $debug == "1") || ($listforadmin && $currentdayofweek == 1)) {
 	$adminsubject = "List of Expired or Expiring Passwords";
 	if(file_exists($scriptPath . "admin_email_inlined.tpl")) {
 				$adminbody = file_get_contents($scriptPath . "admin_email_inlined.tpl");
