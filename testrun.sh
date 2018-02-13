@@ -1,6 +1,6 @@
 #!/bin/bash
 #--enable debug--
-sed -i.baktest "0,/\$debug	.*/ s/\$debug	.*/\$debug = \"1\";/" /usr/local/bin/ad-password-expire-notify/check_expire.php
+sed -i.baktest "0,/\$debug.*/ s/\$debug.*/\$debug = \"1\";/" /usr/local/bin/ad-password-expire-notify/check_expire.php
 #--backup and adjust admin_email
 cp /usr/local/bin/ad-password-expire-notify/admin_email_inlined.tpl /usr/local/bin/ad-password-expire-notify/admin_email_inlined.tpl.tmp
 sed -i.baktest "s|_ENVIRNAME_|New Instance Launch|g" /usr/local/bin/ad-password-expire-notify/admin_email_inlined.tpl.bak
