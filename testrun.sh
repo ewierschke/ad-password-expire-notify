@@ -17,3 +17,4 @@ fi
 cp /usr/local/bin/ad-password-expire-notify/admin_email_inlined.tpl.tmp /usr/local/bin/ad-password-expire-notify/admin_email_inlined.tpl
 #--disable debug for normal operation in cron job
 sed -i.bakrevert "0,/\$debug = \"1\".*/ s/\$debug = \"1\".*/\$debug = \"0\";/" /usr/local/bin/ad-password-expire-notify/check_expire.php
+chmod 600 /usr/local/bin/ad-password-expire-notify/check_expire.php*
