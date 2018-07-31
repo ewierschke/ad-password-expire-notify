@@ -143,6 +143,7 @@ for($i = 0; $i < $count; $i++) {
 	}
 
 			// Check to see if password expiration is greater than disable date and not set to require reset, then disable.
+		if($debug=="0") {
 			if ($userdisable > $usermustreset && $userdisable < $dateasadint && $dsarray[$i]['useraccountcontrol'][0] == 512) {
 				$new['useraccountcontrol'][0] = 514;
 				$new['description'][0] = "Account disabled by script due to inactivity on $currentdatehuman";
@@ -155,6 +156,7 @@ for($i = 0; $i < $count; $i++) {
 				$listforadmin .= "<tr><td>{$dsarray[$i]['samaccountname'][0]}</td><td>was disabled,</td><td>password expired</td><td>$timefrom</td><td>at $timehuman and,</td><td>does $doesnot have PWM password responses stored.\r\n\t<br /></td></tr>";
 				$adminlistcount = $adminlistcount + 1;
 			}
+		}
 
 			// Check to see if today is greater than or equal to disabledays minus warndays (warn period) and less than or equal to the disabledays (disable period) and not disabled.
 //			if ($dateasadint >= $userdisablewarn && $dateasadint <= $userdisable && $dsarray[$i]['useraccountcontrol'][0] == 512) {

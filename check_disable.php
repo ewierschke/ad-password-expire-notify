@@ -43,7 +43,7 @@ $debug			= "0";
 // End Options - Begin Workflow
 
 // Default variables
-$listforadmin 	= "<tr><th><u>Username</u></th><th><u>Account Status</u></th><th><u>Password Status</u></th><th><u>Password Expired Time (in days)</u></th><th><u>Password Expired Time</u></th><th><u>PWM Response set Status</u>\r\n\t<br /></th></tr>";
+$listforadmin 	= "<tr><th><u>Username</u></th><th><u>Account Status</u></th><th><u>Password Status</u></th><th><u>Password Expired Time (in days)</u></th><th><u>Password Expired Time</u></th><th><u>PWM Response set Status</u></th><th><u>Disabled Time</u>\r\n\t<br /></th></tr>";
 $filter			= "(&(objectCategory=Person)(objectClass=User))";
 $attrib			= array("sn", "givenname", "cn", "sAMAccountName", "msDS-UserPasswordExpiryTimeComputed", "mail", "pwmresponseset", "useraccountcontrol");
 
@@ -165,7 +165,7 @@ for($i = 0; $i < $count; $i++) {
 				$timefrom = "$disablenumdays days ago";
 				$timetillforuser = "in $numdays days on $disabletimehumanuser";
 
-				$listforadmin .= "<tr><td>{$dsarray[$i]['samaccountname'][0]}</td><td>is$notdisabled disabled,</td><td>password expired</td><td>$timefrom</td><td>at $disabletimehuman and,</td><td>does $doesnot have PWM password responses stored.\r\n\t<br /></td></tr>";
+				$listforadmin .= "<tr><td>{$dsarray[$i]['samaccountname'][0]}</td><td>is$notdisabled disabled,</td><td>password expired</td><td>$timefrom</td><td>at $timehuman,</td><td>does $doesnot have PWM password responses stored,</td><td>will be disabled at $disabletimehuman.\r\n\t<br /></td></tr>";
 				$adminlistcount = $adminlistcount + 1;
 
 				print "WARNING! Account will be disabled.\n";
@@ -231,8 +231,8 @@ for($i = 0; $i < $count; $i++) {
 //Send email of users to admin.
 if (($listforadmin && $debug == "1") || ($listforadmin && $currentdayofweek == 1)) {
 	$adminsubject = "List of Expired or Expiring Passwords";
-	if(file_exists($scriptPath . "admin_email_inlined.tpl")) {
-				$adminbody = file_get_contents($scriptPath . "admin_email_inlined.tpl");
+	if(file_exists($scriptPath . "disable_admin_email_inlined.tpl")) {
+				$adminbody = file_get_contents($scriptPath . "disable_admin_email_inlined.tpl");
 				$adminbody = str_replace("__CURRENTDATE__", $currentdatehuman, $adminbody);
 				$adminbody = str_replace("__USERLIST__", $listforadmin, $adminbody);
 				$adminbody =  str_replace("__USEROU__", $argumentOU['o'], $adminbody);
