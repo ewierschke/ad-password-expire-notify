@@ -15,8 +15,8 @@ export OUPATH=$(cat /usr/local/bin/oupath)
 sed -i.env1bak "s|_ENVIRNAME_|${ENVIRNAME}|g" /usr/local/bin/ad-password-expire-notify/disable_user_email_inlined.tpl
 sed -i.env2bak "s|_ENVIRNAME_|${ENVIRNAME}|g" /usr/local/bin/ad-password-expire-notify/disable_admin_email_inlined.tpl
 #sed -i.pwmurlbak "s|_PWMURL_|${PWMURL}|g" /usr/local/bin/ad-password-expire-notify/user_email_inlined.tpl
-#sed -i.ostbak "s|_OSTURL_|${OSTURL}|g" /usr/local/bin/ad-password-expire-notify/user_email_inlined.tpl
-#sed -i.ostemailbak "s|_OSTEMAIL_|${OSTEMAIL}|g" /usr/local/bin/ad-password-expire-notify/user_email_inlined.tpl
+sed -i.ostbak "s|_OSTURL_|${OSTURL}|g" /usr/local/bin/ad-password-expire-notify/user_email_inlined.tpl
+sed -i.ostemailbak "s|_OSTEMAIL_|${OSTEMAIL}|g" /usr/local/bin/ad-password-expire-notify/user_email_inlined.tpl
 chmod 600 /usr/local/bin/ad-password-expire-notify/*email_inlined.tpl*
 
 #--php adjust--
