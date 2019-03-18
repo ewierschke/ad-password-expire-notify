@@ -46,7 +46,7 @@ $filter         = "(&(objectCategory=Person)(objectClass=User))";
 $attrib         = array("sn", "givenname", "cn", "sAMAccountName", "msDS-UserPasswordExpiryTimeComputed", "mail", "pwmresponseset", "useraccountcontrol");
 
 // Setup Logging to file
-$file = "/var/log/ad-password-check-expire.log";
+$file = "/var/log/disable_inactive.log";
 $fh = fopen($file, 'a') or die("can't open log file");
 
 // logtime function with microseconds and change from assumed php.ini configured New_York timezone to UTC
@@ -75,6 +75,8 @@ since 1/1/1601.  Since we get epoch from now(), we need to add the difference.
 $offset         = 116444736000000000;
 $oneday         = 864000000000;
 $daystowarn     = $oneday * $warndays;
+$disabledaystowarn = $oneday * ($disabledays - $warndays);
+$disableindays = $oneday * $disabledays;
 
 //Set current date in large int as AD does
 $dateasadint    = ($now * 10000000) + $offset;
@@ -138,6 +140,8 @@ $dsarray = ldap_get_entries($ldapconn, $search);
 $count = $dsarray["count"];
 $adminlistcount = 0;
 $emailcount = 0;
+$disablecount = 0;
+$debugdisablecount = 0;
 
 echo "$count User Objects found.\n";
 fwrite($fh, logtime() . " - $count User Objects found in \"{$argumentOU['o']}\"\n");
@@ -155,7 +159,10 @@ for ($i = 0; $i < $count; $i++) {
     $timehuman = date("m-d-Y H:i:s e", "$timetemp[0]");
     $doesnot = " ";
     $notdisabled = " ";
-    $logemailstatus = "none";
+    $userdisablewarn = $dsarray[$i]['msds-userpasswordexpirytimecomputed'][0] + $disabledaystowarn;
+    $userdisable = $dsarray[$i]['msds-userpasswordexpirytimecomputed'][0] + $disableindays;
+    $usermustreset = "51840000000000";
+    $logdisablestatus = "none";
     echo "Name: {$dsarray[$i]['cn'][0]} \t\t Date: $timehuman \t{$dsarray[$i]['dn']}\n";
     //fwrite($fh, logtime() . " - Name: {$dsarray[$i]['cn'][0]} \t\t Expiration Date: $timehuman \t{$dsarray[$i]['dn']}\n");
     if (!isset($dsarray[$i]['pwmresponseset'][0])) {
@@ -188,8 +195,8 @@ for ($i = 0; $i < $count; $i++) {
         $diff = date_diff($to, $from);
         $numdays = $diff->format('%a');
         $timefrom = "$numdays days ago";
-        $listforadmin .= "<tr><td>{$dsarray[$i]['samaccountname'][0]}</td><td>is$notdisabled disabled,</td><td>password expired</td><td>$timefrom</td><td>at $timehuman and,</td><td>does $doesnot have PWM password responses stored.\r\n\t<br /></td></tr>";
-        $adminlistcount = $adminlistcount + 1;
+        //$listforadmin .= "<tr><td>{$dsarray[$i]['samaccountname'][0]}</td><td>is$notdisabled disabled,</td><td>password expired</td><td>$timefrom</td><td>at $timehuman and,</td><td>does $doesnot have PWM password responses stored.\r\n\t<br /></td></tr>";
+        //$adminlistcount = $adminlistcount + 1;
         $logdays = "-$numdays";
     }
 
@@ -202,75 +209,35 @@ for ($i = 0; $i < $count; $i++) {
         $logdays = "$numdays";
     }
 
-    // Check to see if password expiration is within our warning time limit.
-    if ($dsarray[$i]['msds-userpasswordexpirytimecomputed'][0] <= $warndatethresh && $dsarray[$i]['msds-userpasswordexpirytimecomputed'][0] >= $dateasadint) {
-        $from=date_create(date('Y-m-d'));
-        $to=date_create(date("Y-m-d", "$timetemp[0]"));
-        $diff = date_diff($to, $from);
-        $numdays = $diff->format('%a');
-        $timetill = "in $numdays days";
-        $timetillforuser = "in $numdays days on $timehumanuser";
-
-        $listforadmin .= "<tr><td>{$dsarray[$i]['samaccountname'][0]}</td><td>is$notdisabled disabled,</td><td>password expires</td><td>$timetill</td><td>at $timehuman and,</td><td>does $doesnot have PWM password responses stored.\r\n\t<br /></td></tr>";
-        $adminlistcount = $adminlistcount + 1;
-        echo "WARNING! Password will expire.\n";
-        echo "Sending email to {$dsarray[$i]['cn'][0]} at address {$dsarray[$i]['mail'][0]} \n";
-        //fwrite($fh, logtime() . " - Sending email to {$dsarray[$i]['cn'][0]} at address {$dsarray[$i]['mail'][0]} \n");
-
-        $logsendwarning = "true";
-
-        //If debug is enabled, then send all emails to admin
-        if ($debug=="0") {
-            //If pwmresponseset is not set replace pwmstatus with user guidance to setup pwmresponseset
-            $noreply = "null";
-            $pwmstatus = " ";
-            if ($doesnot == "<strong>NOT</strong>") {
-                $pwmstatus = "You have NOT setup your password responses in PWM to ease password recovery.  Please do so now.";
+        // Check to see if password expiration is greater than disable date and not set to require reset (ie ==512), then disable.
+        if ($userdisable > $usermustreset && $userdisable < $dateasadint && $dsarray[$i]['useraccountcontrol'][0] == 512) {
+            if($debug=="0") {
+                $new['useraccountcontrol'][0] = 514;
+                $new['description'][0] = "Account disabled by script due to inactivity on $currentdatehuman";
+                ldap_modify($ldapconn, $dsarray[$i]['dn'], $new);
+                $logdisablestatus = "disable success";
+                $disablecount = $disablecount + 1;
+            }else {
+                $logdisablestatus = "debugging-will be disabled";
+                $debugdisablecount = $debugdisablecount + 1;
             }
-            //If mail is set in LDAP send to mail, if account is disabled send to null, if mail not set send to admin email.
-            if ($dsarray[$i]['mail'][0] && $dsarray[$i]['useraccountcontrol'][0] == 512) {
-                $userto = "{$dsarray[$i]['mail'][0]}";
-            } elseif ($dsarray[$i]['useraccountcontrol'][0] == 514) {
-                $userto = $noreply;
-            } else {
-                $userto = $adminemailto;
+            $from=date_create(date('Y-m-d'));
+            $to=date_create(date("Y-m-d", "$timetemp[0]"));
+            $diff = date_diff($to,$from);
+            $numdays = $diff->format('%a');
+            $timefrom = "$numdays days ago";
+            $debugtext = "was";
+            if($debug=="1") {
+                $debugtext = "would have been";
             }
-
-            $usersubject = "Password for {$dsarray[$i]['samaccountname'][0]} will expire soon!";
-
-            // Warning Email
-            // Get the email from a template in the same directory as this script.
-            if (file_exists($scriptPath . "user_email_inlined.tpl")) {
-                $userbody = file_get_contents($scriptPath . "user_email_inlined.tpl");
-                $userbody = str_replace("__DISPLAYNAME__", $dsarray[$i]['givenname'][0], $userbody);
-                $userbody = str_replace("__SAMACCOUNTNAME__", $dsarray[$i]['samaccountname'][0], $userbody);
-                $userbody = str_replace("__EXPIRETIME__", $timetillforuser, $userbody);
-                $userbody = str_replace("__PWMRESPONSESETSTATUS__", $pwmstatus, $userbody);
-            }
-
-            // Send the email to the user.
-            if (mail($userto, $usersubject, $userbody, $useremailheader)) {
-                echo("User email successfully sent.\n");
-                //fwrite($fh, logtime() . " - User email successfully sent.\n");
-                $emailcount++;
-                $logemailstatus = "success";
-            } else {
-                echo("User email delivery failed.\n");
-                //fwrite($fh, logtime() . " - User email delivery failed.\n");
-                $logemailstatus = "failed";
-            }
-            unset($pwmstatus);
-            //End If Debug
+            $listforadmin .= "<tr><td>{$dsarray[$i]['samaccountname'][0]}</td><td>$debugtext disabled,</td><td>password expired</td><td>$timefrom</td><td>at $timehuman and,</td><td>does $doesnot have PWM password responses stored.\r\n\t<br /></td></tr>";
+            $adminlistcount = $adminlistcount + 1;
         } else {
-            $logemailstatus = "debugging";
+            $logattemptdisable = "false";
         }
-        //End If check for expiration within warning time limit.
-    } else {
-        $logsendwarning = "false";
-    }
     //generate json for log file
     $status = ['passwordexpiration' => $timehuman, 'daystillexpire' => $logdays, 'accountstate' => $logacctdisabled, 'pwmresponsesetstate' => $logpwmresponseset ];
-    $action = ['emailaddr' => $dsarray[$i]['mail'][0], 'sendwarning' => $logsendwarning, 'emailsendstatus' => $logemailstatus ];
+    $action = ['willattemptdisable' => $logattemptdisable, 'disableactionstatus' => $logdisablestatus ];
     $logdata = ['username' => $dsarray[$i]['cn'][0], 'status' => $status, 'action' => $action ];
     $jsonlogdata = json_encode($logdata);
     fwrite($fh, logtime() . " - $jsonlogdata\n");
@@ -287,8 +254,8 @@ for ($i = 0; $i < $count; $i++) {
     unset($timefrom);
     unset($timetill);
     unset($diff);
-    unset($logsendwarning);
-    unset($logemailstatus);
+    unset($logattemptdisable);
+    unset($logdisablestatus);
     unset($logacctdisabled);
     unset($logpwmresponseset);
     unset($logdays);
@@ -298,13 +265,16 @@ for ($i = 0; $i < $count; $i++) {
 fwrite($fh, logtime() . " - -----\n");
 //Send email list of users to admin if debug enabled or it is a Monday.
 if (($listforadmin && $debug == "1") || ($listforadmin && $currentdayofweek == 1)) {
-    $adminsubject = "List of Expired or Expiring Passwords";
-    if (file_exists($scriptPath . "admin_email_inlined.tpl")) {
-        $adminbody = file_get_contents($scriptPath . "admin_email_inlined.tpl");
+    $adminsubject = "List of Accounts being disabled";
+    if (file_exists($scriptPath . "disable_admin_email_inlined.tpl")) {
+        $adminbody = file_get_contents($scriptPath . "disable_admin_email_inlined.tpl");
         $adminbody = str_replace("__CURRENTDATE__", $currentdatehuman, $adminbody);
         $adminbody = str_replace("__USERLIST__", $listforadmin, $adminbody);
         $adminbody =  str_replace("__USEROU__", $argumentOU['o'], $adminbody);
         $adminbody =  str_replace("__USERCOUNT__", $adminlistcount, $adminbody);
+    } else {
+        echo("Admin email template file not found - empty email sent.\n");
+        fwrite($fh, logtime() . " - Admin email template file not found - empty email sent.\n");
     }
 
     if (mail($adminemailto, $adminsubject, $adminbody, $adminemailheader)) {
@@ -328,6 +298,11 @@ if ($unbind) {
 } else {
     echo "LDAP not unbound.\n";
     fwrite($fh, logtime() . " - LDAP not unbound.\n");
+}
+if($debug=="0") {
+    fwrite($fh, logtime() . " - $disablecount accounts were disabled.\n");
+} else {
+    fwrite($fh, logtime() . " - $debugdisablecount accounts would have been disabled.\n");
 }
 fwrite($fh, logtime() . " - $emailcount emails sent.\n");
 fclose($fh);
