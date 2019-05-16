@@ -16,7 +16,7 @@ $scriptPath     = "/usr/local/pwdexpire/";
 // A regular user to bind to AD.  Use the upn format.
 $ldapupn        = "ldap_bind@sub.domain.tld";
 // That users password
-$ldappass       = "password";
+$ldappass       = 'password';
 // To make a connection to the domain controller over SSL use ldaps:// instead of ldap://
 $ldaphost       = "ldap://dc.sub.domain.tld/";
 //  How many days out to start warning the user.
